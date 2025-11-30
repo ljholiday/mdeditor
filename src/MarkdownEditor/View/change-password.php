@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Editor - Login</title>
+    <title>Markdown Editor - Change Password</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -15,7 +15,7 @@
             background: #f5f5f5;
             padding: 1rem;
         }
-        .login-box {
+        .password-box {
             background: white;
             padding: 2rem;
             border-radius: 8px;
@@ -36,6 +36,22 @@
             margin-bottom: 1rem;
             font-size: 0.9rem;
         }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .info {
+            background: #e7f3ff;
+            color: #004085;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
         .form-group {
             display: flex;
             flex-direction: column;
@@ -47,7 +63,6 @@
             color: #2c3e50;
             font-size: 0.9rem;
         }
-        input[type="text"],
         input[type="password"] {
             padding: 0.75rem;
             font-size: 1rem;
@@ -56,7 +71,6 @@
             width: 100%;
             box-sizing: border-box;
         }
-        input[type="text"]:focus,
         input[type="password"]:focus {
             outline: none;
             border-color: #007bff;
@@ -79,42 +93,49 @@
         button:active {
             background: #004085;
         }
-        .register-link {
+        .back-link {
             text-align: center;
             margin-top: 1.5rem;
             font-size: 0.9rem;
         }
-        .register-link a {
+        .back-link a {
             color: #007bff;
             text-decoration: none;
         }
-        .register-link a:hover {
+        .back-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h2>Markdown Editor</h2>
+    <div class="password-box">
+        <h2>Change Password</h2>
         <?php if (isset($error)): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-        <form method="post" action="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/login">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter username" autofocus required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter password" required>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-        <div class="register-link">
-            <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/forgot-password">Forgot password?</a>
+        <?php if (isset($success)): ?>
+            <div class="success"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
+        <div class="info">
+            New password must be at least 8 characters.
         </div>
-        <div class="register-link">
-            Don't have an account? <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/register">Register here</a>
+        <form method="post" action="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/change-password">
+            <div class="form-group">
+                <label for="current_password">Current Password</label>
+                <input type="password" id="current_password" name="current_password" placeholder="Enter current password" autofocus required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" placeholder="Enter new password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter new password" required>
+            </div>
+            <button type="submit">Change Password</button>
+        </form>
+        <div class="back-link">
+            <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/">Back to Editor</a>
         </div>
     </div>
 </body>

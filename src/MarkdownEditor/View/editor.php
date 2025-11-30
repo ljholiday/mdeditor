@@ -236,6 +236,9 @@
         <h1>📝 Markdown Editor</h1>
         <div class="header-right">
             <span class="current-file" id="currentFile">No file selected</span>
+            <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
+            <button class="btn btn-secondary" onclick="location.href='<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/account-settings'">Account</button>
+            <button class="btn btn-secondary" onclick="location.href='<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/change-password'">Change Password</button>
             <button class="btn btn-secondary" onclick="location.href='<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/logout'">Logout</button>
         </div>
     </div>

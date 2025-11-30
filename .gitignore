@@ -2,4 +2,5 @@ repos
 CLAUDE.md
 vendor/
 .env
+users.json
 composer.phar

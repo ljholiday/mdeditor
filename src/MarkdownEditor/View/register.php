@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Editor - Login</title>
+    <title>Markdown Editor - Register</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -15,7 +15,7 @@
             background: #f5f5f5;
             padding: 1rem;
         }
-        .login-box {
+        .register-box {
             background: white;
             padding: 2rem;
             border-radius: 8px;
@@ -35,6 +35,14 @@
             border-radius: 4px;
             margin-bottom: 1rem;
             font-size: 0.9rem;
+        }
+        .info {
+            background: #e7f3ff;
+            color: #004085;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
         }
         .form-group {
             display: flex;
@@ -64,7 +72,7 @@
         button {
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
-            background: #007bff;
+            background: #28a745;
             color: white;
             border: none;
             border-radius: 4px;
@@ -74,47 +82,56 @@
             margin-top: 0.5rem;
         }
         button:hover {
-            background: #0056b3;
+            background: #218838;
         }
         button:active {
-            background: #004085;
+            background: #1e7e34;
         }
-        .register-link {
+        .login-link {
             text-align: center;
             margin-top: 1.5rem;
             font-size: 0.9rem;
         }
-        .register-link a {
+        .login-link a {
             color: #007bff;
             text-decoration: none;
         }
-        .register-link a:hover {
+        .login-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h2>Markdown Editor</h2>
+    <div class="register-box">
+        <h2>Create Account</h2>
         <?php if (isset($error)): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-        <form method="post" action="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/login">
+        <div class="info">
+            Username must be at least 3 characters.<br>
+            Password must be at least 8 characters.
+        </div>
+        <form method="post" action="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/register">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter username" autofocus required>
+                <input type="text" id="username" name="username" placeholder="Choose a username" autofocus required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter password" required>
+                <input type="password" id="password" name="password" placeholder="Choose a password" required>
             </div>
-            <button type="submit">Login</button>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+            </div>
+            <button type="submit">Create Account</button>
         </form>
-        <div class="register-link">
-            <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/forgot-password">Forgot password?</a>
-        </div>
-        <div class="register-link">
-            Don't have an account? <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/register">Register here</a>
+        <div class="login-link">
+            Already have an account? <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/">Login here</a>
         </div>
     </div>
 </body>

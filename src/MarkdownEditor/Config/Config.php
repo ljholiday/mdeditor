@@ -37,7 +37,7 @@ class Config
 
     private static function validate(): void
     {
-        $required = ['REPOS_PATH', 'PASSWORD_HASH'];
+        $required = ['REPOS_PATH'];
 
         foreach ($required as $key) {
             if (empty(self::$config[$key])) {
@@ -59,10 +59,5 @@ class Config
     public static function getReposPath(): string
     {
         return self::$config['REPOS_PATH'];
-    }
-
-    public static function getPasswordHash(): string
-    {
-        return self::$config['PASSWORD_HASH'];
     }
 }

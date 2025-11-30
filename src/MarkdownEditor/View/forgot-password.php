@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Editor - Login</title>
+    <title>Markdown Editor - Forgot Password</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -15,7 +15,7 @@
             background: #f5f5f5;
             padding: 1rem;
         }
-        .login-box {
+        .forgot-box {
             background: white;
             padding: 2rem;
             border-radius: 8px;
@@ -36,6 +36,22 @@
             margin-bottom: 1rem;
             font-size: 0.9rem;
         }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .info {
+            background: #e7f3ff;
+            color: #004085;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
         .form-group {
             display: flex;
             flex-direction: column;
@@ -47,8 +63,7 @@
             color: #2c3e50;
             font-size: 0.9rem;
         }
-        input[type="text"],
-        input[type="password"] {
+        input[type="email"] {
             padding: 0.75rem;
             font-size: 1rem;
             border: 1px solid #ddd;
@@ -56,8 +71,7 @@
             width: 100%;
             box-sizing: border-box;
         }
-        input[type="text"]:focus,
-        input[type="password"]:focus {
+        input[type="email"]:focus {
             outline: none;
             border-color: #007bff;
         }
@@ -79,42 +93,42 @@
         button:active {
             background: #004085;
         }
-        .register-link {
+        .back-link {
             text-align: center;
             margin-top: 1.5rem;
             font-size: 0.9rem;
         }
-        .register-link a {
+        .back-link a {
             color: #007bff;
             text-decoration: none;
         }
-        .register-link a:hover {
+        .back-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h2>Markdown Editor</h2>
+    <div class="forgot-box">
+        <h2>Forgot Password</h2>
         <?php if (isset($error)): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-        <form method="post" action="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/login">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter username" autofocus required>
+        <?php if (isset($success)): ?>
+            <div class="success"><?= htmlspecialchars($success) ?></div>
+        <?php else: ?>
+            <div class="info">
+                Enter your email address and we'll send you a password reset link.
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter password" required>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-        <div class="register-link">
-            <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/forgot-password">Forgot password?</a>
-        </div>
-        <div class="register-link">
-            Don't have an account? <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/register">Register here</a>
+            <form method="post" action="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/forgot-password">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" autofocus required>
+                </div>
+                <button type="submit">Send Reset Link</button>
+            </form>
+        <?php endif; ?>
+        <div class="back-link">
+            <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/">Back to Login</a>
         </div>
     </div>
 </body>

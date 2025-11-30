@@ -20,12 +20,22 @@ class Router
     public function dispatch(): void
     {
         $dispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
-            // Public routes
+            // Public routes (authentication not required)
+            $r->addRoute('GET', '/register', [AuthController::class, 'showRegister']);
+            $r->addRoute('POST', '/register', [AuthController::class, 'register']);
             $r->addRoute('POST', '/login', [AuthController::class, 'login']);
+            $r->addRoute('GET', '/forgot-password', [AuthController::class, 'showForgotPassword']);
+            $r->addRoute('POST', '/forgot-password', [AuthController::class, 'forgotPassword']);
+            $r->addRoute('GET', '/reset-password', [AuthController::class, 'showResetPassword']);
+            $r->addRoute('POST', '/reset-password', [AuthController::class, 'resetPassword']);
 
             // Protected routes (require authentication)
             $r->addRoute('GET', '/', [EditorController::class, 'index']);
             $r->addRoute('GET', '/logout', [AuthController::class, 'logout']);
+            $r->addRoute('GET', '/account-settings', [AuthController::class, 'showAccountSettings']);
+            $r->addRoute('POST', '/account-settings', [AuthController::class, 'updateAccountSettings']);
+            $r->addRoute('GET', '/change-password', [AuthController::class, 'showChangePassword']);
+            $r->addRoute('POST', '/change-password', [AuthController::class, 'changePassword']);
             $r->addRoute('GET', '/api/files', [FileController::class, 'list']);
             $r->addRoute('GET', '/api/files/{path:.+}', [FileController::class, 'load']);
             $r->addRoute('POST', '/api/files/{path:.+}', [FileController::class, 'save']);
@@ -51,9 +61,6 @@ class Router
         $uri = rawurldecode($uri);
         $uri = $uri ?: '/';
 
-        // DEBUG - Remove this after testing
-        error_log("Router Debug - Method: $httpMethod, URI: $uri, Script: " . ($_SERVER['SCRIPT_NAME'] ?? 'NONE'));
-
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
         switch ($routeInfo[0]) {
@@ -69,8 +76,11 @@ class Router
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
 
+                // List of routes that don't require authentication
+                $publicRoutes = ['login', 'register', 'showRegister', 'showForgotPassword', 'forgotPassword', 'showResetPassword', 'resetPassword'];
+
                 // Check authentication for protected routes
-                if ($handler[0] !== AuthController::class && $handler[1] !== 'login') {
+                if (!in_array($handler[1], $publicRoutes)) {
                     if (!$this->auth->isAuthenticated()) {
                         $this->showLogin();
                         return;
