@@ -8,46 +8,40 @@ class Config
 
     public static function load(string $envPath): void
     {
-        if (!file_exists($envPath)) {
-            throw new \RuntimeException("Configuration file not found: {$envPath}");
+        // .env file is optional - load if it exists
+        if (file_exists($envPath)) {
+            $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+            foreach ($lines as $line) {
+                // Skip comments
+                if (strpos(trim($line), '#') === 0) {
+                    continue;
+                }
+
+                // Parse KEY=VALUE
+                if (strpos($line, '=') !== false) {
+                    list($key, $value) = explode('=', $line, 2);
+                    $key = trim($key);
+                    $value = trim($value);
+
+                    self::$config[$key] = $value;
+                    putenv("{$key}={$value}");
+                }
+            }
         }
 
-        $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-        foreach ($lines as $line) {
-            // Skip comments
-            if (strpos(trim($line), '#') === 0) {
-                continue;
-            }
-
-            // Parse KEY=VALUE
-            if (strpos($line, '=') !== false) {
-                list($key, $value) = explode('=', $line, 2);
-                $key = trim($key);
-                $value = trim($value);
-
-                self::$config[$key] = $value;
-                putenv("{$key}={$value}");
-            }
-        }
-
-        // Validate required configuration
+        // Validate and setup defaults
         self::validate();
     }
 
     private static function validate(): void
     {
-        $required = ['REPOS_PATH'];
+        // Get repos path (will use default if not set)
+        $reposPath = self::getReposPath();
 
-        foreach ($required as $key) {
-            if (empty(self::$config[$key])) {
-                throw new \RuntimeException("Required configuration missing: {$key}");
-            }
-        }
-
-        // Validate repos path exists
-        if (!is_dir(self::$config['REPOS_PATH'])) {
-            throw new \RuntimeException("Repos directory does not exist: " . self::$config['REPOS_PATH']);
+        // Create repos directory if it doesn't exist
+        if (!is_dir($reposPath)) {
+            mkdir($reposPath, 0755, true);
         }
     }
 
@@ -58,6 +52,13 @@ class Config
 
     public static function getReposPath(): string
     {
-        return self::$config['REPOS_PATH'];
+        $path = self::$config['REPOS_PATH'] ?? '';
+
+        // If REPOS_PATH is not set or is relative, use default
+        if (empty($path) || $path[0] !== '/') {
+            return dirname(__DIR__, 3) . '/repos';
+        }
+
+        return $path;
     }
 }
