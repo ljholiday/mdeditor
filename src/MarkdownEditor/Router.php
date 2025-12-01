@@ -2,7 +2,6 @@
 
 namespace MarkdownEditor;
 
-use FastRoute\RouteCollector;
 use MarkdownEditor\Auth\SessionAuth;
 use MarkdownEditor\Controller\AuthController;
 use MarkdownEditor\Controller\EditorController;
@@ -11,40 +10,40 @@ use MarkdownEditor\Controller\FileController;
 class Router
 {
     private SessionAuth $auth;
+    private array $routes = [];
 
     public function __construct()
     {
         $this->auth = new SessionAuth();
+        $this->defineRoutes();
+    }
+
+    private function defineRoutes(): void
+    {
+        // Public routes (authentication not required)
+        $this->routes = [
+            'GET /register' => [AuthController::class, 'showRegister', true],
+            'POST /register' => [AuthController::class, 'register', true],
+            'POST /login' => [AuthController::class, 'login', true],
+            'GET /forgot-password' => [AuthController::class, 'showForgotPassword', true],
+            'POST /forgot-password' => [AuthController::class, 'forgotPassword', true],
+            'GET /reset-password' => [AuthController::class, 'showResetPassword', true],
+            'POST /reset-password' => [AuthController::class, 'resetPassword', true],
+
+            // Protected routes (require authentication)
+            'GET /' => [EditorController::class, 'index', false],
+            'GET /logout' => [AuthController::class, 'logout', false],
+            'GET /account-settings' => [AuthController::class, 'showAccountSettings', false],
+            'POST /account-settings' => [AuthController::class, 'updateAccountSettings', false],
+            'GET /change-password' => [AuthController::class, 'showChangePassword', false],
+            'POST /change-password' => [AuthController::class, 'changePassword', false],
+            'GET /api/files' => [FileController::class, 'list', false],
+        ];
     }
 
     public function dispatch(): void
     {
-        $dispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
-            // Public routes (authentication not required)
-            $r->addRoute('GET', '/register', [AuthController::class, 'showRegister']);
-            $r->addRoute('POST', '/register', [AuthController::class, 'register']);
-            $r->addRoute('POST', '/login', [AuthController::class, 'login']);
-            $r->addRoute('GET', '/forgot-password', [AuthController::class, 'showForgotPassword']);
-            $r->addRoute('POST', '/forgot-password', [AuthController::class, 'forgotPassword']);
-            $r->addRoute('GET', '/reset-password', [AuthController::class, 'showResetPassword']);
-            $r->addRoute('POST', '/reset-password', [AuthController::class, 'resetPassword']);
-
-            // Protected routes (require authentication)
-            $r->addRoute('GET', '/', [EditorController::class, 'index']);
-            $r->addRoute('GET', '/logout', [AuthController::class, 'logout']);
-            $r->addRoute('GET', '/account-settings', [AuthController::class, 'showAccountSettings']);
-            $r->addRoute('POST', '/account-settings', [AuthController::class, 'updateAccountSettings']);
-            $r->addRoute('GET', '/change-password', [AuthController::class, 'showChangePassword']);
-            $r->addRoute('POST', '/change-password', [AuthController::class, 'changePassword']);
-            $r->addRoute('GET', '/api/files', [FileController::class, 'list']);
-            $r->addRoute('GET', '/api/files/{path:.+}', [FileController::class, 'load']);
-            $r->addRoute('POST', '/api/files/{path:.+}', [FileController::class, 'save']);
-        });
-
-        // Get the request URI and method
         $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-
-        // Parse the URI - handle subdirectory deployment
         $uri = $_SERVER['REQUEST_URI'] ?? '/';
 
         // Remove query string
@@ -61,45 +60,55 @@ class Router
         $uri = rawurldecode($uri);
         $uri = $uri ?: '/';
 
-        $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+        // Check for API file routes with dynamic paths
+        if (strpos($uri, '/api/files/') === 0) {
+            $filePath = substr($uri, strlen('/api/files/'));
+            $this->handleApiFileRoute($httpMethod, $filePath);
+            return;
+        }
 
-        switch ($routeInfo[0]) {
-            case \FastRoute\Dispatcher::NOT_FOUND:
-                $this->notFound();
-                break;
+        // Check static routes
+        $routeKey = "$httpMethod $uri";
+        if (isset($this->routes[$routeKey])) {
+            [$controllerClass, $method, $isPublic] = $this->routes[$routeKey];
 
-            case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-                $this->methodNotAllowed();
-                break;
+            // Check authentication for protected routes
+            if (!$isPublic && !$this->auth->isAuthenticated()) {
+                $this->showLogin();
+                return;
+            }
 
-            case \FastRoute\Dispatcher::FOUND:
-                $handler = $routeInfo[1];
-                $vars = $routeInfo[2];
+            $controller = new $controllerClass();
+            $controller->$method();
+            return;
+        }
 
-                // List of routes that don't require authentication
-                $publicRoutes = ['login', 'register', 'showRegister', 'showForgotPassword', 'forgotPassword', 'showResetPassword', 'resetPassword'];
+        $this->notFound();
+    }
 
-                // Check authentication for protected routes
-                if (!in_array($handler[1], $publicRoutes)) {
-                    if (!$this->auth->isAuthenticated()) {
-                        $this->showLogin();
-                        return;
-                    }
-                }
+    private function handleApiFileRoute(string $method, string $filePath): void
+    {
+        if (!$this->auth->isAuthenticated()) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+            return;
+        }
 
-                // Call the controller method
-                $controller = new $handler[0]();
-                call_user_func_array([$controller, $handler[1]], $vars);
-                break;
+        $controller = new FileController();
+
+        if ($method === 'GET') {
+            $controller->load($filePath);
+        } elseif ($method === 'POST') {
+            $controller->save($filePath);
+        } else {
+            $this->methodNotAllowed();
         }
     }
 
     private function notFound(): void
     {
         http_response_code(404);
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN';
-        $uri = $_SERVER['REQUEST_URI'] ?? 'UNKNOWN';
-        echo "404 Not Found - $method $uri";
+        echo '404 Not Found';
     }
 
     private function methodNotAllowed(): void
