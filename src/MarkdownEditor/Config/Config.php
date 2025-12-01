@@ -54,9 +54,22 @@ class Config
     {
         $path = self::$config['REPOS_PATH'] ?? '';
 
-        // If REPOS_PATH is not set or is relative, use default
-        if (empty($path) || $path[0] !== '/') {
+        // If REPOS_PATH is not set, use default
+        if (empty($path)) {
             return dirname(__DIR__, 3) . '/repos';
+        }
+
+        // Expand tilde (~) to home directory
+        if ($path[0] === '~') {
+            $home = getenv('HOME') ?: (getenv('USERPROFILE') ?: '');
+            if ($home) {
+                $path = $home . substr($path, 1);
+            }
+        }
+
+        // If path is relative, resolve it from the app root
+        if ($path[0] !== '/') {
+            $path = dirname(__DIR__, 3) . '/' . $path;
         }
 
         return $path;
