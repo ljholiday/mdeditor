@@ -61,4 +61,14 @@ class Config
 
         return $path;
     }
+
+    public static function getAdminUsername(): ?string
+    {
+        return self::$config['ADMIN_USERNAME'] ?? null;
+    }
+
+    public static function getAdminPassword(): ?string
+    {
+        return self::$config['ADMIN_PASSWORD'] ?? null;
+    }
 }

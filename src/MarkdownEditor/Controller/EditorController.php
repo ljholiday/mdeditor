@@ -9,7 +9,7 @@ class EditorController
     public function index(): void
     {
         $auth = new SessionAuth();
-        $username = $auth->getCurrentUsername();
+        $username = $auth->getUsername();
 
         require __DIR__ . '/../View/editor.php';
     }

@@ -110,12 +110,6 @@
             </div>
             <button type="submit">Login</button>
         </form>
-        <div class="register-link">
-            <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/forgot-password">Forgot password?</a>
-        </div>
-        <div class="register-link">
-            Don't have an account? <a href="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/register">Register here</a>
-        </div>
     </div>
 </body>
 </html>

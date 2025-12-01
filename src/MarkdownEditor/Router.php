@@ -22,21 +22,11 @@ class Router
     {
         // Public routes (authentication not required)
         $this->routes = [
-            'GET /register' => [AuthController::class, 'showRegister', true],
-            'POST /register' => [AuthController::class, 'register', true],
             'POST /login' => [AuthController::class, 'login', true],
-            'GET /forgot-password' => [AuthController::class, 'showForgotPassword', true],
-            'POST /forgot-password' => [AuthController::class, 'forgotPassword', true],
-            'GET /reset-password' => [AuthController::class, 'showResetPassword', true],
-            'POST /reset-password' => [AuthController::class, 'resetPassword', true],
 
             // Protected routes (require authentication)
             'GET /' => [EditorController::class, 'index', false],
             'GET /logout' => [AuthController::class, 'logout', false],
-            'GET /account-settings' => [AuthController::class, 'showAccountSettings', false],
-            'POST /account-settings' => [AuthController::class, 'updateAccountSettings', false],
-            'GET /change-password' => [AuthController::class, 'showChangePassword', false],
-            'POST /change-password' => [AuthController::class, 'changePassword', false],
             'GET /api/files' => [FileController::class, 'list', false],
         ];
     }

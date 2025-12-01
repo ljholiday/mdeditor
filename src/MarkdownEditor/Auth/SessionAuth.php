@@ -2,37 +2,34 @@
 
 namespace MarkdownEditor\Auth;
 
-use MarkdownEditor\Service\UserService;
+use MarkdownEditor\Config\Config;
 
 class SessionAuth
 {
-    private UserService $userService;
-
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
-        $this->userService = new UserService();
     }
 
     public function isAuthenticated(): bool
     {
-        return isset($_SESSION['username']) && !empty($_SESSION['username']);
-    }
-
-    public function getCurrentUsername(): ?string
-    {
-        return $_SESSION['username'] ?? null;
+        return isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
     }
 
     public function login(string $username, string $password): bool
     {
-        $user = $this->userService->authenticate($username, $password);
+        $adminUsername = Config::getAdminUsername();
+        $adminPassword = Config::getAdminPassword();
 
-        if ($user !== null) {
-            $_SESSION['username'] = $user->getUsername();
+        if (!$adminUsername || !$adminPassword) {
+            return false;
+        }
+
+        if ($username === $adminUsername && $password === $adminPassword) {
+            $_SESSION['authenticated'] = true;
+            $_SESSION['username'] = $username;
             return true;
         }
 
@@ -41,6 +38,12 @@ class SessionAuth
 
     public function logout(): void
     {
+        $_SESSION = [];
         session_destroy();
+    }
+
+    public function getUsername(): ?string
+    {
+        return $_SESSION['username'] ?? null;
     }
 }
