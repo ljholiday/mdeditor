@@ -43,8 +43,7 @@ class AuthController
 
     private function redirect(string $path): void
     {
-        $baseUrl = Url::basePath();
-        header('Location: ' . $baseUrl . $path);
+        header('Location: ' . Url::absolute($path));
         exit;
     }
 }

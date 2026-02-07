@@ -19,6 +19,22 @@ class Url
         return $override === '/' ? '' : $override;
     }
 
+    public static function absolute(string $path): string
+    {
+        $base = self::basePath();
+        $path = '/' . ltrim($path, '/');
+
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        $proto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ($_SERVER['HTTPS'] ?? '');
+        $scheme = (!empty($proto) && $proto !== 'off') ? 'https' : 'http';
+
+        if ($host === '') {
+            return $base . $path;
+        }
+
+        return $scheme . '://' . $host . $base . $path;
+    }
+
     public static function stripBasePath(string $path): string
     {
         $base = self::basePath();
