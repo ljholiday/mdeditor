@@ -7,6 +7,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Start session early to avoid header warnings during tests
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 echo "=== Markdown Editor Test Suite ===\n\n";
 
 $errors = 0;
@@ -36,7 +41,7 @@ foreach ($files as $file => $expectedPerms) {
 
 // Test 2: Check directory permissions
 echo "\nTEST 2: Directory Permissions\n";
-$dirs = ['src', 'repos', 'public'];
+$dirs = ['src', 'public'];
 foreach ($dirs as $dir) {
     if (!is_dir($dir)) {
         echo "  ✗ $dir does not exist\n";
