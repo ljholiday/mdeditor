@@ -187,6 +187,8 @@
             flex: 1;
             overflow: auto;
             padding: 1rem;
+            display: flex;
+            gap: 1rem;
         }
 
         .CodeMirror {
@@ -196,6 +198,30 @@
 
         .CodeMirror-scroll {
             overflow: auto !important;
+        }
+
+        .editor-pane {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-pane {
+            flex: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #ffffff;
+            padding: 1rem;
+            overflow: auto;
+        }
+
+        .preview-pane.hidden {
+            display: none;
+        }
+
+        .editor-wrapper.single {
+            display: block;
         }
 
         .no-file-selected {
@@ -256,11 +282,14 @@
                 <button class="btn btn-success" id="saveBtn" disabled>💾 Save</button>
                 <button class="btn btn-primary" id="refreshBtn">🔄 Refresh Files</button>
             </div>
-            <div class="editor-wrapper">
+            <div class="editor-wrapper single">
                 <div id="noFileSelected" class="no-file-selected">
                     Select a file from the sidebar to begin editing
                 </div>
-                <textarea id="editor" style="display: none;"></textarea>
+                <div class="editor-pane">
+                    <textarea id="editor" style="display: none;"></textarea>
+                </div>
+                <div id="htmlPreview" class="preview-pane hidden"></div>
             </div>
         </div>
     </div>
@@ -275,6 +304,7 @@
         let editor = null;
         let currentFile = null;
         let originalContent = '';
+        let currentExtension = '';
 
         // Initialize EasyMDE
         function initEditor() {
@@ -296,6 +326,7 @@
 
             editor.codemirror.on('change', function() {
                 checkForChanges();
+                updateHtmlPreview();
             });
         }
 
@@ -395,6 +426,7 @@
                     if (data.success) {
                         currentFile = filePath;
                         originalContent = data.content;
+                        currentExtension = getExtension(filePath);
 
                         if (!editor) {
                             document.getElementById('noFileSelected').style.display = 'none';
@@ -403,6 +435,7 @@
                         }
 
                         editor.value(data.content);
+                        updateHtmlPreview(true);
                         document.getElementById('currentFile').textContent = filePath;
                         document.getElementById('saveBtn').disabled = true;
 
@@ -460,6 +493,34 @@
         function checkForChanges() {
             if (currentFile) {
                 document.getElementById('saveBtn').disabled = !hasUnsavedChanges();
+            }
+        }
+
+        function getExtension(path) {
+            const parts = path.split('.');
+            if (parts.length < 2) return '';
+            return parts.pop().toLowerCase();
+        }
+
+        function updateHtmlPreview(force = false) {
+            const preview = document.getElementById('htmlPreview');
+            const wrapper = document.querySelector('.editor-wrapper');
+
+            if (!currentFile || currentExtension !== 'html') {
+                preview.classList.add('hidden');
+                wrapper.classList.add('single');
+                return;
+            }
+
+            preview.classList.remove('hidden');
+            wrapper.classList.remove('single');
+
+            if (!editor) return;
+            if (editor.codemirror) {
+                editor.codemirror.refresh();
+            }
+            if (force || currentExtension === 'html') {
+                preview.innerHTML = editor.value();
             }
         }
 

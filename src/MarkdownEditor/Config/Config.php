@@ -75,6 +75,25 @@ class Config
         return $path;
     }
 
+    public static function getAllowedExtensions(): array
+    {
+        $raw = self::$config['ALLOWED_EXTENSIONS'] ?? '';
+        if (empty($raw)) {
+            return ['md', 'markdown'];
+        }
+
+        $parts = array_filter(array_map('trim', explode(',', $raw)));
+        $exts = [];
+        foreach ($parts as $part) {
+            $ext = strtolower(ltrim($part, '.'));
+            if ($ext !== '') {
+                $exts[] = $ext;
+            }
+        }
+
+        return $exts ?: ['md', 'markdown'];
+    }
+
     public static function getAdminUsername(): ?string
     {
         return self::$config['ADMIN_USERNAME'] ?? null;

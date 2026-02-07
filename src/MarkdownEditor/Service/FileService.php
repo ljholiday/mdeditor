@@ -21,12 +21,13 @@ class FileService
     public function listMarkdownFiles(): array
     {
         $files = [];
+        $allowedExtensions = Config::getAllowedExtensions();
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($this->reposPath, \RecursiveDirectoryIterator::SKIP_DOTS)
         );
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && in_array($file->getExtension(), ['md', 'markdown'])) {
+            if ($file->isFile() && in_array(strtolower($file->getExtension()), $allowedExtensions, true)) {
                 $relativePath = str_replace($this->reposPath . '/', '', $file->getPathname());
                 $files[] = [
                     'path' => $relativePath,
