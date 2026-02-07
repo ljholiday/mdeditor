@@ -237,8 +237,6 @@
         <div class="header-right">
             <span class="current-file" id="currentFile">No file selected</span>
             <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
-            <button class="btn btn-secondary" onclick="location.href='<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/account-settings'">Account</button>
-            <button class="btn btn-secondary" onclick="location.href='<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/change-password'">Change Password</button>
             <button class="btn btn-secondary" onclick="location.href='<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/logout'">Logout</button>
         </div>
     </div>
@@ -342,7 +340,7 @@
                 html += `<div class="file-group-files" id="${dirId}">`;
                 grouped[dir].forEach(file => {
                     const active = currentFile === file.path ? 'active' : '';
-                    html += `<div class="file-item ${active}" onclick="loadFile('${file.path}')">${file.name}</div>`;
+                    html += `<div class="file-item ${active}" onclick="loadFile('${file.path}', this)">${file.name}</div>`;
                 });
                 html += '</div>';
                 html += '</div>';
@@ -380,7 +378,7 @@
         }
 
         // Load file content
-        function loadFile(filePath) {
+        function loadFile(filePath, el) {
             if (editor && hasUnsavedChanges()) {
                 if (!confirm('You have unsaved changes. Do you want to discard them?')) {
                     return;
@@ -408,7 +406,9 @@
                         document.querySelectorAll('.file-item').forEach(item => {
                             item.classList.remove('active');
                         });
-                        event.target.classList.add('active');
+                        if (el) {
+                            el.classList.add('active');
+                        }
                     } else {
                         showStatus('Error loading file: ' + data.error, 'error');
                     }

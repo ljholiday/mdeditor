@@ -10,7 +10,23 @@ if (php_sapi_name() !== 'cli') {
     die("This script must be run from the command line\n");
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
+// Local PSR-4 autoloader (no Composer dependency)
+spl_autoload_register(function ($class) {
+    $prefix = 'MarkdownEditor\\';
+    $baseDir = __DIR__ . '/src/MarkdownEditor/';
+
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+
+    $relativeClass = substr($class, $len);
+    $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
+});
 
 use MarkdownEditor\Service\UserService;
 

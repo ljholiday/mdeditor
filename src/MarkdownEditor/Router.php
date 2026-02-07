@@ -23,6 +23,7 @@ class Router
         // Public routes (authentication not required)
         $this->routes = [
             'POST /login' => [AuthController::class, 'login', true],
+            'GET /login' => [AuthController::class, 'showLogin', true],
 
             // Protected routes (require authentication)
             'GET /' => [EditorController::class, 'index', false],

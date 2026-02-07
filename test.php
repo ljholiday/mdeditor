@@ -16,9 +16,7 @@ $warnings = 0;
 echo "TEST 1: File Permissions\n";
 $files = [
     '.env' => 0644,
-    'index.php' => 0644,
-    '.htaccess' => 0644,
-    'composer.json' => 0644,
+    'public/index.php' => 0644,
 ];
 
 foreach ($files as $file => $expectedPerms) {
@@ -38,7 +36,7 @@ foreach ($files as $file => $expectedPerms) {
 
 // Test 2: Check directory permissions
 echo "\nTEST 2: Directory Permissions\n";
-$dirs = ['src', 'repos', 'vendor'];
+$dirs = ['src', 'repos', 'public'];
 foreach ($dirs as $dir) {
     if (!is_dir($dir)) {
         echo "  ✗ $dir does not exist\n";
@@ -56,13 +54,23 @@ foreach ($dirs as $dir) {
 
 // Test 3: Autoloader
 echo "\nTEST 3: Autoloader\n";
-if (!file_exists('vendor/autoload.php')) {
-    echo "  ✗ vendor/autoload.php missing - run composer install\n";
-    $errors++;
-} else {
-    require_once 'vendor/autoload.php';
-    echo "  ✓ Autoloader loaded\n";
-}
+spl_autoload_register(function ($class) {
+    $prefix = 'MarkdownEditor\\';
+    $baseDir = __DIR__ . '/src/MarkdownEditor/';
+
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+
+    $relativeClass = substr($class, $len);
+    $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+echo "  ✓ Autoloader registered\n";
 
 // Test 4: Config Loading
 echo "\nTEST 4: Config Loading\n";
@@ -80,12 +88,13 @@ try {
         echo "  ✓ REPOS_PATH directory exists\n";
     }
 
-    $passwordHash = \MarkdownEditor\Config\Config::getPasswordHash();
-    if (empty($passwordHash)) {
-        echo "  ✗ PASSWORD_HASH is empty\n";
+    $adminUsername = \MarkdownEditor\Config\Config::getAdminUsername();
+    $adminPassword = \MarkdownEditor\Config\Config::getAdminPassword();
+    if (empty($adminUsername) || empty($adminPassword)) {
+        echo "  ✗ ADMIN_USERNAME or ADMIN_PASSWORD is empty\n";
         $errors++;
     } else {
-        echo "  ✓ PASSWORD_HASH is set\n";
+        echo "  ✓ Admin credentials are set\n";
     }
 } catch (Exception $e) {
     echo "  ✗ Config error: " . $e->getMessage() . "\n";
@@ -99,20 +108,26 @@ try {
     echo "  ✓ SessionAuth instantiated\n";
 
     // Test login with correct password
-    if ($auth->login('change_this_password')) {
-        echo "  ✓ Login with correct password works\n";
+    if (!empty($adminUsername) && !empty($adminPassword)) {
+        if ($auth->login($adminUsername, $adminPassword)) {
+            echo "  ✓ Login with correct credentials works\n";
+        } else {
+            echo "  ✗ Login with correct credentials failed\n";
+            $errors++;
+        }
+
+        // Test login with wrong password
+        if (!$auth->login($adminUsername, 'wrong_password')) {
+            echo "  ✓ Login with wrong password correctly fails\n";
+        } else {
+            echo "  ✗ Login with wrong password succeeded (security issue!)\n";
+            $errors++;
+        }
     } else {
-        echo "  ✗ Login with correct password failed\n";
+        echo "  ✗ Skipping login tests: admin credentials missing\n";
         $errors++;
     }
 
-    // Test login with wrong password
-    if (!$auth->login('wrong_password')) {
-        echo "  ✓ Login with wrong password correctly fails\n";
-    } else {
-        echo "  ✗ Login with wrong password succeeded (security issue!)\n";
-        $errors++;
-    }
 } catch (Exception $e) {
     echo "  ✗ Authentication error: " . $e->getMessage() . "\n";
     $errors++;
@@ -191,11 +206,21 @@ try {
 
 // Test 9: Check for syntax errors in all PHP files
 echo "\nTEST 9: PHP Syntax Check\n";
-$iterator = new RecursiveIteratorIterator(
-    new RecursiveDirectoryIterator('src', RecursiveDirectoryIterator::SKIP_DOTS)
-);
+$pathsToCheck = ['src', 'public'];
+$filesToCheck = [];
+foreach ($pathsToCheck as $path) {
+    if (!is_dir($path)) {
+        continue;
+    }
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS)
+    );
+    foreach ($iterator as $file) {
+        $filesToCheck[] = $file;
+    }
+}
 $syntaxErrors = 0;
-foreach ($iterator as $file) {
+foreach ($filesToCheck as $file) {
     if ($file->isFile() && $file->getExtension() === 'php') {
         $output = [];
         $returnVar = 0;

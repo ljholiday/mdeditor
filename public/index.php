@@ -11,7 +11,7 @@ ini_set('display_errors', 1);
 // Simple PSR-4 autoloader
 spl_autoload_register(function ($class) {
     $prefix = 'MarkdownEditor\\';
-    $base_dir = __DIR__ . '/src/MarkdownEditor/';
+    $base_dir = __DIR__ . '/../src/MarkdownEditor/';
 
     $len = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {
@@ -30,7 +30,7 @@ use MarkdownEditor\Config\Config;
 use MarkdownEditor\Router;
 
 // Initialize configuration
-Config::load(__DIR__ . '/.env');
+Config::load(__DIR__ . '/../.env');
 
 // Create and dispatch router
 $router = new Router();
