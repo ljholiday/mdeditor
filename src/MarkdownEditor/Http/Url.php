@@ -22,6 +22,20 @@ class Url
             }
         }
 
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        if (!empty($requestUri)) {
+            $path = $requestUri;
+            if (false !== $pos = strpos($path, '?')) {
+                $path = substr($path, 0, $pos);
+            }
+            $path = rtrim(str_replace('\\', '/', $path), '/');
+            $publicPos = strpos($path, '/public');
+            if ($publicPos !== false) {
+                $base = substr($path, 0, $publicPos + strlen('/public'));
+                return $base === '' ? '' : $base;
+            }
+        }
+
         $scriptFilename = $_SERVER['SCRIPT_FILENAME'] ?? '';
         $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
 
