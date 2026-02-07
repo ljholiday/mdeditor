@@ -18,11 +18,22 @@ php -S localhost:8080 -t public public/router.php
 
 Then open `http://localhost:8080/`.
 
+If you want a subdirectory URL locally (e.g. `/mdeditor`), use a web server
+with rewrites (nginx or Apache) and set `BASE_PATH=/mdeditor` in `.env`.
+
 ## Shared Hosting Deployment
 
-- Point the web root (document root) to the `public/` directory.
-- Do not expose the project root; `public/` must be the only web-accessible path.
-- No `.htaccess` is required or assumed.
+You have two supported deployment modes:
+
+1. **Clean URL** (recommended): `https://example.com/mdeditor/`
+   - Keep the app in a subdirectory and rewrite `/mdeditor/*` into `public/`.
+   - Apache: use the provided `.htaccess` files.
+   - Nginx: add a location block to map `/mdeditor/` to `public/`.
+   - Set `BASE_PATH=/mdeditor` in `.env`.
+
+2. **Public URL**: `https://example.com/mdeditor/public/`
+   - Point the web root to `public/`.
+   - Set `BASE_PATH=/mdeditor/public` in `.env`.
 
 ## Configuration
 
@@ -30,6 +41,7 @@ Configuration is loaded from `.env` (optional). If omitted, defaults are used.
 
 - `REPOS_PATH`: path where Markdown files are stored. Defaults to `./repos`.
 - `ADMIN_USERNAME` and `ADMIN_PASSWORD`: credentials for login.
+- `BASE_PATH`: required when the app is served from a subdirectory (e.g. `/mdeditor`).
 
 See `.env.example` for the available settings.
 
