@@ -301,6 +301,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
     <script>
         const BASE_URL = '<?= htmlspecialchars($base) ?>';
+        const ROOT_LABEL = '<?= htmlspecialchars($rootLabel ?? 'Root') ?>';
 
         let editor = null;
         let currentFile = null;
@@ -372,7 +373,7 @@
                 html += '<div class="file-group">';
                 html += `<div class="file-group-title" onclick="toggleDirectory('${dirId}')">`;
                 html += `<span class="expand-icon">▼</span>`;
-                html += `${dir === '.' ? 'Root' : dir}`;
+                html += `${dir === '.' ? ROOT_LABEL : dir}`;
                 html += `</div>`;
                 html += `<div class="file-group-files" id="${dirId}">`;
                 grouped[dir].forEach(file => {

@@ -3,6 +3,7 @@
 namespace MarkdownEditor\Controller;
 
 use MarkdownEditor\Auth\SessionAuth;
+use MarkdownEditor\Config\Config;
 
 class EditorController
 {
@@ -10,6 +11,7 @@ class EditorController
     {
         $auth = new SessionAuth();
         $username = $auth->getUsername();
+        $rootLabel = basename(Config::getReposPath()) ?: 'Root';
 
         require __DIR__ . '/../View/editor.php';
     }
