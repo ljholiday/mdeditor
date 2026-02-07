@@ -185,13 +185,17 @@
 
         .editor-wrapper {
             flex: 1;
-            overflow: hidden;
+            overflow: auto;
             padding: 1rem;
         }
 
         .CodeMirror {
             height: 100% !important;
             font-size: 14px;
+        }
+
+        .CodeMirror-scroll {
+            overflow: auto !important;
         }
 
         .no-file-selected {
