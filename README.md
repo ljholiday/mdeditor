@@ -26,24 +26,6 @@ Key settings:
 
 See `.env.example` for a full template.
 
-## Local Development
-
-From the project root:
-
-```sh
-php -S localhost:8080 -t public public/router.php
-```
-
-Open:
-
-- `http://localhost:8080/`
-
-If you want a subdirectory URL locally (e.g. `/mdeditor`), use a web server with rewrites and set:
-
-```
-BASE_PATH=/mdeditor
-```
-
 ## Deployment (Shared Hosting or VM)
 
 You have two supported URL modes:
