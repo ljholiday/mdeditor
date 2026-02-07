@@ -6,7 +6,17 @@
 
 // Serve static files directly
 if (php_sapi_name() === 'cli-server') {
-    $file = __DIR__ . $_SERVER['REQUEST_URI'];
+    $uri = $_SERVER['REQUEST_URI'];
+
+    // Support local subdirectory access (e.g., /mdeditor/*)
+    if (strpos($uri, '/mdeditor/') === 0) {
+        $uri = substr($uri, strlen('/mdeditor'));
+        $_SERVER['REQUEST_URI'] = $uri ?: '/';
+        $_SERVER['SCRIPT_NAME'] = '/mdeditor/index.php';
+        $_SERVER['PHP_SELF'] = '/mdeditor/index.php';
+    }
+
+    $file = __DIR__ . $uri;
 
     // If it's a real file (not a directory) and exists, serve it
     if (is_file($file)) {
