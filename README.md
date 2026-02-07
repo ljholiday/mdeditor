@@ -1,53 +1,89 @@
 # Markdown Editor
 
-A self-contained Markdown editor designed for shared hosting. The app assumes a hostile hosting environment and enforces a single public entry point via the `public/` directory.
+A lightweight, self-contained Markdown editor designed to run on shared hosting or a small VM.
 
 ## Requirements
 
 - PHP 8.0+
-- File system access for the content repository directory
+- Write access to the content directory
 
-## Quick Start (Local)
+## What This App Expects
 
-1. Copy `.env.example` to `.env` and update credentials.
-2. Start the built-in server from the project root:
+- A single public entry point under `public/` (`public/index.php`).
+- All application code lives under `src/`.
+- When served from a subdirectory (e.g. `/mdeditor`), you must set `BASE_PATH` in `.env`.
+
+## Configuration
+
+Configuration is loaded from `.env` in the project root (optional). If omitted, defaults are used.
+
+Key settings:
+
+- `REPOS_PATH` (optional): where Markdown files live. Defaults to `./repos`.
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD` (required for login).
+- `BASE_PATH` (required for subdirectory installs): e.g. `/mdeditor` or `/mdeditor/public`.
+- `ALLOWED_EXTENSIONS` (optional): comma-separated extensions, e.g. `md,markdown,txt,html`.
+
+See `.env.example` for a full template.
+
+## Local Development
+
+From the project root:
 
 ```sh
 php -S localhost:8080 -t public public/router.php
 ```
 
-Then open `http://localhost:8080/`.
+Open:
 
-If you want a subdirectory URL locally (e.g. `/mdeditor`), use a web server
-with rewrites (nginx or Apache) and set `BASE_PATH=/mdeditor` in `.env`.
+- `http://localhost:8080/`
 
-## Shared Hosting Deployment
+If you want a subdirectory URL locally (e.g. `/mdeditor`), use a web server with rewrites and set:
 
-You have two supported deployment modes:
+```
+BASE_PATH=/mdeditor
+```
 
-1. **Clean URL** (recommended): `https://example.com/mdeditor/`
-   - Keep the app in a subdirectory and rewrite `/mdeditor/*` into `public/`.
-   - Apache: use the provided `.htaccess` files.
-   - Nginx: add a location block to map `/mdeditor/` to `public/`.
-   - Set `BASE_PATH=/mdeditor` in `.env`.
+## Deployment (Shared Hosting or VM)
 
-2. **Public URL**: `https://example.com/mdeditor/public/`
-   - Point the web root to `public/`.
-   - Set `BASE_PATH=/mdeditor/public` in `.env`.
+You have two supported URL modes:
 
-## Configuration
+### 1) Clean URL (Recommended)
 
-Configuration is loaded from `.env` (optional). If omitted, defaults are used.
+Example:
 
-- `REPOS_PATH`: path where Markdown files are stored. Defaults to `./repos`.
-- `ADMIN_USERNAME` and `ADMIN_PASSWORD`: credentials for login.
-- `BASE_PATH`: required when the app is served from a subdirectory (e.g. `/mdeditor`).
+- `https://example.com/mdeditor/`
 
-See `.env.example` for the available settings.
+Requirements:
+
+- Route `/mdeditor/*` into `public/` at the web-server layer.
+- Set `BASE_PATH=/mdeditor` in `.env`.
+
+#### Apache (shared hosting)
+
+Use both `.htaccess` files included in the repo:
+
+- `./.htaccess` rewrites `/mdeditor/*` → `/mdeditor/public/*`
+- `./public/.htaccess` sends all requests to `public/index.php`
+
+#### Nginx (VM)
+
+Create a location that maps `/mdeditor/` to `public/`, and ensure PHP requests are routed correctly.
+
+### 2) Public URL
+
+Example:
+
+- `https://example.com/mdeditor/public/`
+
+Requirements:
+
+- Point the web root to `public/`.
+- Set `BASE_PATH=/mdeditor/public` in `.env`.
 
 ## Admin Tools (CLI)
 
-Run the CLI admin utility from the project root:
+Run from the project root:
 
 ```sh
 php admin-tools.php
@@ -57,6 +93,6 @@ This tool reads and updates `users.json` in the project root.
 
 ## Project Layout
 
-- `public/`: the only public entry point (`public/index.php`)
-- `src/`: application code
-- `repos/`: Markdown file storage (created automatically if missing)
+- `public/` — public entry point (`public/index.php`)
+- `src/` — application code
+- `repos/` — Markdown file storage (created automatically if missing)
