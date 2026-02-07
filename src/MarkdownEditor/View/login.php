@@ -99,7 +99,8 @@
         <?php if (isset($error)): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-        <form method="post" action="<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/login">
+        <?php $base = \MarkdownEditor\Http\Url::basePath(); ?>
+        <form method="post" action="<?= htmlspecialchars($base . '/login') ?>">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" placeholder="Enter username" autofocus required>

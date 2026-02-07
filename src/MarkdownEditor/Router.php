@@ -6,6 +6,7 @@ use MarkdownEditor\Auth\SessionAuth;
 use MarkdownEditor\Controller\AuthController;
 use MarkdownEditor\Controller\EditorController;
 use MarkdownEditor\Controller\FileController;
+use MarkdownEditor\Http\Url;
 
 class Router
 {
@@ -42,11 +43,7 @@ class Router
             $uri = substr($uri, 0, $pos);
         }
 
-        // Remove script name/subdirectory from URI
-        $scriptName = dirname($_SERVER['SCRIPT_NAME'] ?? '');
-        if ($scriptName !== '/' && $scriptName !== '.') {
-            $uri = substr($uri, strlen($scriptName));
-        }
+        $uri = Url::stripBasePath($uri);
 
         $uri = rawurldecode($uri);
         $uri = $uri ?: '/';

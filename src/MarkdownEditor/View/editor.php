@@ -267,7 +267,8 @@
         <div class="header-right">
             <span class="current-file" id="currentFile">No file selected</span>
             <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
-            <button class="btn btn-secondary" onclick="location.href='<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>/logout'">Logout</button>
+            <?php $base = \MarkdownEditor\Http\Url::basePath(); ?>
+            <button class="btn btn-secondary" onclick="location.href='<?= htmlspecialchars($base . '/logout') ?>'">Logout</button>
         </div>
     </div>
 
@@ -299,7 +300,7 @@
     <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
     <script>
-        const BASE_URL = '<?php $base = dirname($_SERVER['SCRIPT_NAME']); echo ($base === '/' ? '' : $base); ?>';
+        const BASE_URL = '<?= htmlspecialchars($base) ?>';
 
         let editor = null;
         let currentFile = null;
@@ -337,6 +338,7 @@
                 .then(data => {
                     if (data.success) {
                         displayFileList(data.files);
+                        checkForChanges();
                     }
                 })
                 .catch(error => {

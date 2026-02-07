@@ -3,6 +3,7 @@
 namespace MarkdownEditor\Controller;
 
 use MarkdownEditor\Auth\SessionAuth;
+use MarkdownEditor\Http\Url;
 
 class AuthController
 {
@@ -42,8 +43,7 @@ class AuthController
 
     private function redirect(string $path): void
     {
-        $baseUrl = dirname($_SERVER['SCRIPT_NAME']);
-        $baseUrl = $baseUrl === '/' ? '' : $baseUrl;
+        $baseUrl = Url::basePath();
         header('Location: ' . $baseUrl . $path);
         exit;
     }
