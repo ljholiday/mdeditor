@@ -16,6 +16,10 @@ class AuthController
 
     public function showLogin(): void
     {
+        if (!$this->auth->isAuthEnabled()) {
+            $this->redirect('/');
+        }
+
         $error = $_SESSION['login_error'] ?? null;
         unset($_SESSION['login_error']);
 
@@ -24,6 +28,10 @@ class AuthController
 
     public function login(): void
     {
+        if (!$this->auth->isAuthEnabled()) {
+            $this->redirect('/');
+        }
+
         $username = $_POST['username'] ?? '';
         $password = $_POST['password'] ?? '';
 

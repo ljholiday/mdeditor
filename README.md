@@ -17,6 +17,8 @@ This is a simple, practical editor for shared hosting or small servers where you
 
 Configuration lives in `.env`. See `.env.example` for available options.
 
+Login is optional. If `ADMIN_USERNAME` and `ADMIN_PASSWORD` are both set, the app requires login. If either is missing, the app is open.
+
 ## Security
 
 The app is designed to run with a single public entry point under `public/` and keeps all other code outside the web root.
