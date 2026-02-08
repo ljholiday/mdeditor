@@ -61,6 +61,7 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            position: relative;
         }
 
         .current-file {
@@ -108,6 +109,20 @@
             padding: 0.6rem 1.1rem;
             font-size: 0.95rem;
             font-weight: 600;
+        }
+
+        .actions-btn {
+            display: none;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .header-actions.open {
+            display: flex;
         }
 
         .main {
@@ -311,6 +326,24 @@
                 justify-content: center;
             }
 
+            .actions-btn {
+                display: inline-flex;
+            }
+
+            .header-actions {
+                display: none;
+                position: absolute;
+                right: 0;
+                top: calc(100% + 0.5rem);
+                flex-direction: column;
+                background: #2c3e50;
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 8px;
+                padding: 0.5rem;
+                z-index: 1002;
+                min-width: 180px;
+            }
+
             .sidebar {
                 width: 260px;
                 position: fixed;
@@ -336,10 +369,13 @@
             <span class="current-file" id="currentFile">No file selected</span>
             <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
             <?php $base = \MarkdownEditor\Http\Url::basePath(); ?>
-            <button class="btn btn-success btn-lg" id="saveBtn" disabled>Save</button>
-            <button class="btn btn-primary btn-lg" id="refreshBtn">Refresh Files</button>
-            <button class="btn btn-secondary btn-lg" id="newFileBtn">New File</button>
-            <button class="btn btn-secondary" onclick="location.href='<?= htmlspecialchars($base . '/logout') ?>'">Logout</button>
+            <button class="btn btn-secondary btn-lg actions-btn" id="actionsBtn">Actions</button>
+            <div class="header-actions" id="headerActions">
+                <button class="btn btn-success btn-lg" id="saveBtn" disabled>Save</button>
+                <button class="btn btn-primary btn-lg" id="refreshBtn">Refresh Files</button>
+                <button class="btn btn-secondary btn-lg" id="newFileBtn">New File</button>
+                <button class="btn btn-secondary btn-lg" id="logoutBtn" onclick="location.href='<?= htmlspecialchars($base . '/logout') ?>'">Logout</button>
+            </div>
         </div>
     </div>
 
@@ -655,6 +691,8 @@
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
         const menuBtn = document.getElementById('menuBtn');
+        const actionsBtn = document.getElementById('actionsBtn');
+        const headerActions = document.getElementById('headerActions');
 
         function toggleSidebar(forceOpen = null) {
             const shouldOpen = forceOpen !== null ? forceOpen : sidebar.classList.contains('hidden');
@@ -664,6 +702,13 @@
 
         menuBtn.addEventListener('click', () => toggleSidebar());
         overlay.addEventListener('click', () => toggleSidebar(false));
+
+        function toggleActions(forceOpen = null) {
+            const shouldOpen = forceOpen !== null ? forceOpen : !headerActions.classList.contains('open');
+            headerActions.classList.toggle('open', shouldOpen);
+        }
+
+        actionsBtn.addEventListener('click', () => toggleActions());
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
@@ -695,6 +740,9 @@
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('file-item')) {
                 toggleSidebar(false);
+            }
+            if (headerActions.classList.contains('open') && !headerActions.contains(e.target) && e.target !== actionsBtn) {
+                toggleActions(false);
             }
         });
     </script>
