@@ -432,6 +432,7 @@
         let originalContent = '';
         let currentExtension = '';
         let isLoading = false;
+        const DEFAULT_TITLE = document.title || 'Markdown Editor';
 
         // Initialize EasyMDE
         function initEditor() {
@@ -573,6 +574,7 @@
                         updateHtmlPreview(true);
                         document.getElementById('currentFile').textContent = filePath;
                         document.getElementById('saveBtn').disabled = true;
+                        updatePageTitle(filePath);
 
                         // Update active state in file list
                         document.querySelectorAll('.file-item').forEach(item => {
@@ -665,6 +667,17 @@
             const parts = path.split('.');
             if (parts.length < 2) return '';
             return parts.pop().toLowerCase();
+        }
+
+        function getFileName(path) {
+            if (!path) return '';
+            const parts = path.split('/');
+            return parts.pop() || '';
+        }
+
+        function updatePageTitle(path) {
+            const name = getFileName(path);
+            document.title = name ? name : DEFAULT_TITLE;
         }
 
         function updateHtmlPreview(force = false) {
