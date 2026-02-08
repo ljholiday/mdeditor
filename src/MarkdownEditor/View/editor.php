@@ -307,6 +307,7 @@
         let currentFile = null;
         let originalContent = '';
         let currentExtension = '';
+        let isLoading = false;
 
         // Initialize EasyMDE
         function initEditor() {
@@ -327,6 +328,7 @@
             });
 
             editor.codemirror.on('change', function() {
+                if (isLoading) return;
                 checkForChanges();
                 updateHtmlPreview();
             });
@@ -428,7 +430,6 @@
                 .then(data => {
                     if (data.success) {
                         currentFile = filePath;
-                        originalContent = data.content;
                         currentExtension = getExtension(filePath);
 
                         if (!editor) {
@@ -437,7 +438,14 @@
                             initEditor();
                         }
 
+                        isLoading = true;
                         editor.value(data.content);
+                        editor.codemirror.clearHistory();
+                        setTimeout(() => {
+                            originalContent = editor.value();
+                            isLoading = false;
+                            checkForChanges();
+                        }, 0);
                         updateHtmlPreview(true);
                         document.getElementById('currentFile').textContent = filePath;
                         document.getElementById('saveBtn').disabled = true;
@@ -494,6 +502,7 @@
         }
 
         function checkForChanges() {
+            if (isLoading) return;
             if (currentFile) {
                 document.getElementById('saveBtn').disabled = !hasUnsavedChanges();
             }
