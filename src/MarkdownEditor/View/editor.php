@@ -28,6 +28,9 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1001;
         }
 
         .header h1 {
@@ -80,6 +83,12 @@
 
         .btn-secondary:hover {
             background: #7f8c8d;
+        }
+
+        .btn-lg {
+            padding: 0.6rem 1.1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
 
         .main {
@@ -175,14 +184,6 @@
             overflow: hidden;
         }
 
-        .editor-toolbar {
-            padding: 0.5rem 1rem;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            gap: 0.5rem;
-        }
-
         .editor-wrapper {
             flex: 1;
             overflow: auto;
@@ -268,6 +269,8 @@
             <span class="current-file" id="currentFile">No file selected</span>
             <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
             <?php $base = \MarkdownEditor\Http\Url::basePath(); ?>
+            <button class="btn btn-success btn-lg" id="saveBtn" disabled>Save</button>
+            <button class="btn btn-primary btn-lg" id="refreshBtn">Refresh Files</button>
             <button class="btn btn-secondary" onclick="location.href='<?= htmlspecialchars($base . '/logout') ?>'">Logout</button>
         </div>
     </div>
@@ -279,10 +282,6 @@
         </div>
 
         <div class="editor-container">
-            <div class="editor-toolbar">
-                <button class="btn btn-success" id="saveBtn" disabled>💾 Save</button>
-                <button class="btn btn-primary" id="refreshBtn">🔄 Refresh Files</button>
-            </div>
             <div class="editor-wrapper single">
                 <div id="noFileSelected" class="no-file-selected">
                     Select a file from the sidebar to begin editing
