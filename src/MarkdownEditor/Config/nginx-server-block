@@ -1,0 +1,29 @@
+server {
+    listen 80;
+    server_name mdeditor.local;
+
+    root /home/ljholiday/public_html/mdeditor/public;
+    index index.php;
+
+    location = /mdeditor {
+        return 301 /mdeditor/;
+    }
+
+    location /mdeditor/ {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME /home/ljholiday/public_html/mdeditor/public$fastcgi_script_name;
+    }
+
+    location / {
+        return 404;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
