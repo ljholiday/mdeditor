@@ -2,3 +2,5 @@ CLAUDE.md
 vendor/
 .env
 composer.phar
+error_log
+public/error_log
