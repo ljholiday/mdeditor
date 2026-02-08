@@ -382,14 +382,18 @@
         </div>
         <div class="header-right">
             <span class="current-file" id="currentFile">No file selected</span>
-            <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
+            <?php if (!empty($authEnabled) && !empty($username)): ?>
+                <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
+            <?php endif; ?>
             <?php $base = \MarkdownEditor\Http\Url::basePath(); ?>
             <button class="btn btn-secondary btn-lg actions-btn" id="actionsBtn">Actions</button>
             <div class="header-actions" id="headerActions">
                 <button class="btn btn-success btn-lg" id="saveBtn" disabled>Save</button>
                 <button class="btn btn-primary btn-lg" id="refreshBtn">Refresh Files</button>
                 <button class="btn btn-secondary btn-lg" id="newFileBtn">New File</button>
-                <button class="btn btn-secondary btn-lg" id="logoutBtn" onclick="location.href='<?= htmlspecialchars($base . '/logout') ?>'">Logout</button>
+                <?php if (!empty($authEnabled)): ?>
+                    <button class="btn btn-secondary btn-lg" id="logoutBtn" onclick="location.href='<?= htmlspecialchars($base . '/logout') ?>'">Logout</button>
+                <?php endif; ?>
             </div>
         </div>
     </div>
