@@ -357,6 +357,21 @@
                 position: relative;
             }
         }
+
+        @media (min-width: 769px) {
+            .sidebar {
+                position: static;
+                transform: none !important;
+            }
+
+            .sidebar.hidden {
+                transform: none !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -700,6 +715,13 @@
             overlay.classList.toggle('active', shouldOpen);
         }
 
+        function syncSidebarVisibility() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('hidden');
+                overlay.classList.remove('active');
+            }
+        }
+
         menuBtn.addEventListener('click', () => toggleSidebar());
         overlay.addEventListener('click', () => toggleSidebar(false));
 
@@ -734,7 +756,11 @@
 
         if (window.innerWidth <= 768) {
             toggleSidebar(false);
+        } else {
+            syncSidebarVisibility();
         }
+
+        window.addEventListener('resize', syncSidebarVisibility);
 
         // Close sidebar on file selection for mobile
         document.addEventListener('click', function(e) {
