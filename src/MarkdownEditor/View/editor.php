@@ -271,6 +271,7 @@
             <?php $base = \MarkdownEditor\Http\Url::basePath(); ?>
             <button class="btn btn-success btn-lg" id="saveBtn" disabled>Save</button>
             <button class="btn btn-primary btn-lg" id="refreshBtn">Refresh Files</button>
+            <button class="btn btn-secondary btn-lg" id="newFileBtn">New File</button>
             <button class="btn btn-secondary" onclick="location.href='<?= htmlspecialchars($base . '/logout') ?>'">Logout</button>
         </div>
     </div>
@@ -494,6 +495,35 @@
                 });
         }
 
+        // Create a new file
+        function createFile() {
+            const input = prompt('New file path (e.g. notes/new-file.md):');
+            if (!input) return;
+
+            const formData = new FormData();
+            formData.append('path', input);
+
+            fetch(BASE_URL + '/api/files', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus('File created', 'success');
+                        loadFileList();
+                        const path = input.includes('.') ? input : input + '.md';
+                        loadFile(path);
+                    } else {
+                        showStatus('Error creating file: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showStatus('Error creating file', 'error');
+                });
+        }
+
         // Check for unsaved changes
         function hasUnsavedChanges() {
             if (!editor || !currentFile) return false;
@@ -550,6 +580,7 @@
         // Event listeners
         document.getElementById('saveBtn').addEventListener('click', saveFile);
         document.getElementById('refreshBtn').addEventListener('click', loadFileList);
+        document.getElementById('newFileBtn').addEventListener('click', createFile);
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {

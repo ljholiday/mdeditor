@@ -30,6 +30,7 @@ class Router
             'GET /' => [EditorController::class, 'index', false],
             'GET /logout' => [AuthController::class, 'logout', false],
             'GET /api/files' => [FileController::class, 'list', false],
+            'POST /api/files' => [FileController::class, 'create', false],
         ];
     }
 

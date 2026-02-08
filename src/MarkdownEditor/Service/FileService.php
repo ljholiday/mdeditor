@@ -90,6 +90,30 @@ class FileService
     }
 
     /**
+     * Create a new empty file (creates parent directories if needed)
+     */
+    public function createFile(string $relativePath): bool
+    {
+        $relativePath = $this->normalizePath($relativePath);
+        $filePath = $this->validatePath($relativePath);
+
+        if ($filePath === null) {
+            return false;
+        }
+
+        if (file_exists($filePath)) {
+            return false;
+        }
+
+        $dir = dirname($filePath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        return file_put_contents($filePath, '') !== false;
+    }
+
+    /**
      * Validate file path to prevent directory traversal attacks
      * This preserves the security logic from the original index.php lines 124-127 and 141-144
      *
@@ -112,5 +136,33 @@ class FileService
 
         // Reconstruct the full path with the filename
         return $realPath . '/' . basename($filePath);
+    }
+
+    private function normalizePath(string $relativePath): string
+    {
+        $path = trim($relativePath);
+        $path = ltrim($path, '/');
+
+        $parts = explode('/', $path);
+        $safe = [];
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if ($part === '' || $part === '.' || $part === '..') {
+                continue;
+            }
+            $safe[] = $part;
+        }
+
+        if (empty($safe)) {
+            return '';
+        }
+
+        $path = implode('/', $safe);
+
+        if (strpos(basename($path), '.') === false) {
+            $path .= '.md';
+        }
+
+        return $path;
     }
 }

@@ -84,4 +84,32 @@ class FileController
             ]);
         }
     }
+
+    /**
+     * Create a new empty file
+     */
+    public function create(): void
+    {
+        header('Content-Type: application/json');
+
+        $path = trim($_POST['path'] ?? '');
+        if ($path === '') {
+            echo json_encode([
+                'success' => false,
+                'error' => 'No path provided'
+            ]);
+            return;
+        }
+
+        $success = $this->fileService->createFile($path);
+
+        if ($success) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'error' => 'Failed to create file or access denied'
+            ]);
+        }
+    }
 }
