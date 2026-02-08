@@ -31,6 +31,25 @@
             position: sticky;
             top: 0;
             z-index: 1001;
+            gap: 0.75rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .menu-btn {
+            display: none;
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
         }
 
         .header h1 {
@@ -103,6 +122,26 @@
             border-right: 1px solid #bdc3c7;
             overflow-y: auto;
             padding: 1rem;
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
         }
 
         .sidebar h3 {
@@ -256,15 +295,43 @@
         }
 
         @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-right {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .menu-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
             .sidebar {
-                width: 250px;
+                width: 260px;
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                z-index: 1001;
+            }
+
+            .main {
+                position: relative;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>📝 Markdown Editor</h1>
+        <div class="header-left">
+            <button class="menu-btn" id="menuBtn" aria-label="Toggle file list">☰</button>
+            <h1>📝 Markdown Editor</h1>
+        </div>
         <div class="header-right">
             <span class="current-file" id="currentFile">No file selected</span>
             <span class="current-file">User: <?= htmlspecialchars($username) ?></span>
@@ -276,8 +343,10 @@
         </div>
     </div>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="main">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <h3>Files</h3>
             <div id="fileList">Loading...</div>
         </div>
@@ -582,6 +651,20 @@
         document.getElementById('refreshBtn').addEventListener('click', loadFileList);
         document.getElementById('newFileBtn').addEventListener('click', createFile);
 
+        // Mobile sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.getElementById('menuBtn');
+
+        function toggleSidebar(forceOpen = null) {
+            const shouldOpen = forceOpen !== null ? forceOpen : sidebar.classList.contains('hidden');
+            sidebar.classList.toggle('hidden', !shouldOpen);
+            overlay.classList.toggle('active', shouldOpen);
+        }
+
+        menuBtn.addEventListener('click', () => toggleSidebar());
+        overlay.addEventListener('click', () => toggleSidebar(false));
+
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             // Ctrl+S or Cmd+S to save
@@ -603,6 +686,17 @@
 
         // Load file list on page load
         loadFileList();
+
+        if (window.innerWidth <= 768) {
+            toggleSidebar(false);
+        }
+
+        // Close sidebar on file selection for mobile
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('file-item')) {
+                toggleSidebar(false);
+            }
+        });
     </script>
 </body>
 </html>
