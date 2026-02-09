@@ -7,3 +7,9 @@
 - Update browser tab title to selected file name.
 - Make login optional when admin credentials are unset.
 - Hide user info/logout when auth is disabled.
+
+## v1.0.0 - 2026-02-07
+- Initial release of the Markdown editor web app.
+- File browsing with nested folders and server-side file storage.
+- Editor with autosave disabled by default and manual save.
+- Optional HTML editing when enabled in configuration.
