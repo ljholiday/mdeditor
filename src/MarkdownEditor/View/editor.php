@@ -246,6 +246,14 @@
             gap: 1rem;
         }
 
+        .editor-wrapper.preview-only .editor-pane {
+            display: none;
+        }
+
+        .editor-wrapper.preview-only .preview-pane {
+            flex: 1;
+        }
+
         .CodeMirror {
             height: 100% !important;
             font-size: 14px;
@@ -433,6 +441,8 @@
         let currentExtension = '';
         let isLoading = false;
         const DEFAULT_TITLE = document.title || 'Markdown Editor';
+        const PREVIEWABLE_EXTENSIONS = new Set(['md', 'markdown', 'html']);
+        let previewMode = 'hidden';
 
         // Initialize EasyMDE
         function initEditor() {
@@ -447,7 +457,29 @@
                     'bold', 'italic', 'heading', '|',
                     'quote', 'unordered-list', 'ordered-list', '|',
                     'link', 'image', '|',
-                    'preview', 'side-by-side', 'fullscreen', '|',
+                    {
+                        name: 'preview',
+                        action: function() {
+                            if (!isPreviewable()) return;
+                            const next = previewMode === 'preview' ? 'hidden' : 'preview';
+                            setPreviewMode(next);
+                            renderPreview(true);
+                        },
+                        className: 'fa fa-eye',
+                        title: 'Preview'
+                    },
+                    {
+                        name: 'side-by-side',
+                        action: function() {
+                            if (!isPreviewable()) return;
+                            const next = previewMode === 'split' ? 'hidden' : 'split';
+                            setPreviewMode(next);
+                            renderPreview(true);
+                        },
+                        className: 'fa fa-columns',
+                        title: 'Side-by-side'
+                    },
+                    'fullscreen', '|',
                     'guide'
                 ]
             });
@@ -455,7 +487,7 @@
             editor.codemirror.on('change', function() {
                 if (isLoading) return;
                 checkForChanges();
-                updateHtmlPreview();
+                renderPreview();
             });
         }
 
@@ -619,7 +651,18 @@
                             isLoading = false;
                             checkForChanges();
                         }, 0);
-                        updateHtmlPreview(true);
+                        if (isPreviewable()) {
+                            if (currentExtension === 'html') {
+                                setPreviewMode('split');
+                            } else if (previewMode !== 'hidden') {
+                                setPreviewMode(previewMode);
+                            } else {
+                                applyPreviewLayout();
+                            }
+                            renderPreview(true);
+                        } else {
+                            setPreviewMode('hidden');
+                        }
                         document.getElementById('currentFile').textContent = filePath;
                         document.getElementById('saveBtn').disabled = true;
                         updatePageTitle(filePath);
@@ -728,26 +771,57 @@
             document.title = name ? name : DEFAULT_TITLE;
         }
 
-        function updateHtmlPreview(force = false) {
+        function isPreviewable() {
+            return currentFile && PREVIEWABLE_EXTENSIONS.has(currentExtension);
+        }
+
+        function setPreviewMode(mode) {
+            previewMode = mode;
+            applyPreviewLayout();
+        }
+
+        function applyPreviewLayout() {
             const preview = document.getElementById('htmlPreview');
             const wrapper = document.querySelector('.editor-wrapper');
+            const editorPane = document.querySelector('.editor-pane');
 
-            if (!currentFile || currentExtension !== 'html') {
+            if (!isPreviewable() || previewMode === 'hidden') {
                 preview.classList.add('hidden');
                 wrapper.classList.add('single');
+                wrapper.classList.remove('preview-only');
+                editorPane.style.display = '';
                 return;
             }
 
             preview.classList.remove('hidden');
             wrapper.classList.remove('single');
+            if (previewMode === 'preview') {
+                wrapper.classList.add('preview-only');
+            } else {
+                wrapper.classList.remove('preview-only');
+                editorPane.style.display = '';
+            }
+        }
+
+        function renderPreview(force = false) {
+            const preview = document.getElementById('htmlPreview');
+
+            if (!isPreviewable() || previewMode === 'hidden') {
+                return;
+            }
 
             if (!editor) return;
             if (editor.codemirror) {
                 editor.codemirror.refresh();
             }
-            if (force || currentExtension === 'html') {
+            if (!force && previewMode === 'hidden') return;
+
+            if (currentExtension === 'html') {
                 preview.innerHTML = editor.value();
+                return;
             }
+
+            preview.innerHTML = marked.parse(editor.value());
         }
 
         // Show status message
