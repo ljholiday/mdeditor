@@ -475,7 +475,7 @@
                 });
         }
 
-        // Display file list grouped by directory
+        // Display file list grouped by directory (nested)
         function displayFileList(files) {
             const fileList = document.getElementById('fileList');
 
@@ -484,37 +484,25 @@
                 return;
             }
 
-            // Group files by directory
-            const grouped = {};
-            files.forEach(file => {
-                if (!grouped[file.dir]) {
-                    grouped[file.dir] = [];
-                }
-                grouped[file.dir].push(file);
-            });
+            const tree = buildFileTree(files);
 
             // Build HTML
             let html = '<div class="file-list">';
-            Object.keys(grouped).sort().forEach(dir => {
-                const dirId = 'dir-' + dir.replace(/[^a-zA-Z0-9]/g, '-');
-                html += '<div class="file-group">';
-                html += `<div class="file-group-title" onclick="toggleDirectory('${dirId}')">`;
-                html += `<span class="expand-icon">▼</span>`;
-                html += `${dir === '.' ? ROOT_LABEL : dir}`;
-                html += `</div>`;
-                html += `<div class="file-group-files" id="${dirId}">`;
-                grouped[dir].forEach(file => {
-                    const active = currentFile === file.path ? 'active' : '';
-                    html += `<div class="file-item ${active}" onclick="loadFile('${file.path}', this)">${file.name}</div>`;
-                });
-                html += '</div>';
-                html += '</div>';
-            });
+            const rootId = 'dir-root';
+            html += '<div class="file-group">';
+            html += `<div class="file-group-title" onclick="toggleDirectory('${rootId}')">`;
+            html += `<span class="expand-icon">▼</span>`;
+            html += `${ROOT_LABEL}`;
+            html += `</div>`;
+            html += `<div class="file-group-files" id="${rootId}">`;
+            html += renderTree(tree);
+            html += '</div>';
+            html += '</div>';
             html += '</div>';
 
             fileList.innerHTML = html;
 
-            // START WITH DIRECTORIES COLLAPSED (FIX)
+            // START WITH DIRECTORIES COLLAPSED, THEN EXPAND ROOT
             document.querySelectorAll('.file-group-files').forEach(el => {
                 el.classList.add('collapsed');
                 el.style.maxHeight = '0';
@@ -522,24 +510,84 @@
             document.querySelectorAll('.file-group-title').forEach(el => {
                 el.classList.add('collapsed');
             });
+
+            const rootFiles = document.getElementById('dir-root');
+            if (rootFiles) {
+                setDirectoryExpanded(rootFiles, true);
+            }
+        }
+
+        function buildFileTree(files) {
+            const root = { path: '', dirs: {}, files: [] };
+
+            files.forEach(file => {
+                const parts = file.path.split('/');
+                let node = root;
+
+                for (let i = 0; i < parts.length - 1; i++) {
+                    const part = parts[i];
+                    if (!part) {
+                        continue;
+                    }
+                    if (!node.dirs[part]) {
+                        const nextPath = node.path ? (node.path + '/' + part) : part;
+                        node.dirs[part] = { path: nextPath, dirs: {}, files: [] };
+                    }
+                    node = node.dirs[part];
+                }
+
+                node.files.push({ name: file.name, path: file.path });
+            });
+
+            return root;
+        }
+
+        function renderTree(node) {
+            let html = '';
+
+            const dirNames = Object.keys(node.dirs).sort();
+            const files = node.files.slice().sort((a, b) => a.name.localeCompare(b.name));
+
+            dirNames.forEach(name => {
+                const child = node.dirs[name];
+                const dirId = 'dir-' + child.path.replace(/[^a-zA-Z0-9]/g, '-');
+                html += '<div class="file-group">';
+                html += `<div class="file-group-title" onclick="toggleDirectory('${dirId}')">`;
+                html += `<span class="expand-icon">▼</span>`;
+                html += `${name}`;
+                html += `</div>`;
+                html += `<div class="file-group-files" id="${dirId}">`;
+                html += renderTree(child);
+                html += '</div>';
+                html += '</div>';
+            });
+
+            files.forEach(file => {
+                const active = currentFile === file.path ? 'active' : '';
+                html += `<div class="file-item ${active}" onclick="loadFile('${file.path}', this)">${file.name}</div>`;
+            });
+
+            return html;
         }
 
         // Toggle directory collapse/expand
         function toggleDirectory(dirId) {
             const filesDiv = document.getElementById(dirId);
-            const titleDiv = filesDiv.previousElementSibling;
 
             if (filesDiv.classList.contains('collapsed')) {
                 // Expand
-                filesDiv.classList.remove('collapsed');
-                titleDiv.classList.remove('collapsed');
-                filesDiv.style.maxHeight = filesDiv.scrollHeight + 'px';
+                setDirectoryExpanded(filesDiv, true);
             } else {
                 // Collapse
-                filesDiv.classList.add('collapsed');
-                titleDiv.classList.add('collapsed');
-                filesDiv.style.maxHeight = '0';
+                setDirectoryExpanded(filesDiv, false);
             }
+        }
+
+        function setDirectoryExpanded(filesDiv, expanded) {
+            const titleDiv = filesDiv.previousElementSibling;
+            filesDiv.classList.toggle('collapsed', !expanded);
+            titleDiv.classList.toggle('collapsed', !expanded);
+            filesDiv.style.maxHeight = expanded ? 'none' : '0';
         }
 
         // Load file content
