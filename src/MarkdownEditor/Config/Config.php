@@ -39,9 +39,12 @@ class Config
         // Get repos path (will use default if not set)
         $reposPath = self::getReposPath();
 
-        // Create repos directory if it doesn't exist
         if (!is_dir($reposPath)) {
-            mkdir($reposPath, 0755, true);
+            throw new \RuntimeException("REPOS_PATH directory does not exist: {$reposPath}");
+        }
+
+        if (!is_writable($reposPath)) {
+            throw new \RuntimeException("REPOS_PATH is not writable: {$reposPath}");
         }
     }
 
@@ -61,7 +64,7 @@ class Config
 
         // Expand tilde (~) to home directory
         if ($path[0] === '~') {
-            $home = getenv('HOME') ?: (getenv('USERPROFILE') ?: '');
+            $home = self::getAppOwnerHome();
             if ($home) {
                 $path = $home . substr($path, 1);
             }
@@ -73,6 +76,21 @@ class Config
         }
 
         return $path;
+    }
+
+    private static function getAppOwnerHome(): string
+    {
+        $appRoot = dirname(__DIR__, 3);
+        $ownerId = @fileowner($appRoot);
+
+        if ($ownerId !== false && function_exists('posix_getpwuid')) {
+            $owner = @posix_getpwuid($ownerId);
+            if (is_array($owner) && !empty($owner['dir'])) {
+                return $owner['dir'];
+            }
+        }
+
+        return getenv('HOME') ?: (getenv('USERPROFILE') ?: '');
     }
 
     public static function getAllowedExtensions(): array

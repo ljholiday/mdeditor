@@ -11,7 +11,7 @@ class Url
         $override = Config::get('BASE_PATH');
         if (empty($override)) {
             http_response_code(500);
-            echo 'Configuration error: BASE_PATH is required. Set BASE_PATH=/mdeditor/public in .env';
+            echo 'Configuration error: BASE_PATH is required. Set BASE_PATH=/ for a root deployment or /public if the public directory is part of the URL.';
             exit;
         }
 

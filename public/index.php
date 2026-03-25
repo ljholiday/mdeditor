@@ -29,9 +29,17 @@ spl_autoload_register(function ($class) {
 use MarkdownEditor\Config\Config;
 use MarkdownEditor\Router;
 
-// Initialize configuration
-Config::load(__DIR__ . '/../.env');
+try {
+    // Initialize configuration
+    Config::load(__DIR__ . '/../.env');
 
-// Create and dispatch router
-$router = new Router();
-$router->dispatch();
+    // Create and dispatch router
+    $router = new Router();
+    $router->dispatch();
+} catch (\RuntimeException $e) {
+    http_response_code(500);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Configuration error\n\n";
+    echo $e->getMessage() . "\n";
+    exit;
+}
